@@ -6,6 +6,7 @@ jobs:
     steps:
     - name: Installation depends
       run: |
+        export AWS_REGION="eu-west-1"
         aws --version
         mkdir output
         aws s3 cp s3://msd-for-monai-eu/Task01_BrainTumour.tar --no-sign-request ./output
