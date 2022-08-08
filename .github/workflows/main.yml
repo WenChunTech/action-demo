@@ -6,8 +6,7 @@ jobs:
     steps:
     - name: Installation depends
       run: |
-        sudo apt-get update
-        sudo apt-get -y install curl zip
+        aws --version
         mkdir output
         aws s3 cp s3://msd-for-monai-eu/Task01_BrainTumour.tar --no-sign-request ./output
         zip -r output.zip ./output
