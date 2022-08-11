@@ -6,16 +6,10 @@ jobs:
     steps:
     - name: Installation depends
       run: |
-        export AWS_REGION="eu-west-1"
-        aws --version
-        mkdir output
-        aws s3 cp s3://msd-for-monai-eu/Task01_BrainTumour.tar --no-sign-request ./output
-        zip -r output.zip ./output
-#        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-#        unzip awscliv2.zip
-#        sudo ./aws/install
+        pip install tensorflow_datasets
+        python3 main.py
+        zip -r dataset.zip ~/tensorflow_datasets
 
-        
     - name : upload binary
       uses: actions/upload-artifact@master
       if: always()
