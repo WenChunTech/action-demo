@@ -11,7 +11,7 @@ jobs:
       run: |
         pip install tensorflow tensorflow_datasets
         python3 main.py
-        zip -r dataset.zip ~/tensorflow_datasets
+        7z a dataset.zip ~/tensorflow_datasets/glue
 
     - name : upload binary
       uses: actions/upload-artifact@master
