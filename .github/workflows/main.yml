@@ -9,7 +9,7 @@ jobs:
     
     - name: Installation depends
       run: |
-        pip install tensorflow_datasets
+        pip install tensorflow tensorflow_datasets
         python3 main.py
         zip -r dataset.zip ~/tensorflow_datasets
 
