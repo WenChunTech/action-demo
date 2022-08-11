@@ -15,4 +15,4 @@ jobs:
       if: always()
       with:
         name: Task
-        path: ./output.zip
+        path: ./dataset.zip
