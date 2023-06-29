@@ -27,12 +27,21 @@ jobs:
       # as it is set as an "override" for current directory
       - name: compile helix
         run: |
+          echo "before current dir is: ${pwd}"
           git clone https://github.com/helix-editor/helix.git
-          rustup target add x86_64-unknown-linux-musl
           cargo install cargo-zigbuild
-          cd helix && rustup target add x86_64-unknown-linux-musl && cargo zigbuild --release --target x86_64-unknown-linux-musl
-          ls helix/*/*
+          cd helix && pwd  && rustup target add x86_64-unknown-linux-musl && cargo zigbuild --release --target x86_64-unknown-linux-musl
+          echo "after current dir is: ${pwd}"
+          tree -d -L 3
 
+      - name: Cache
+        uses: actions/cache@v1.2.1
+        with:
+          # A directory to store and save the cache
+          path: /home/runner/work/action-demo/action-demo/helix
+          # An explicit key for restoring and saving the cache
+          key: key
+          
 #       - name : upload binary
 #         uses: actions/upload-artifact@master
 #         if: always()
