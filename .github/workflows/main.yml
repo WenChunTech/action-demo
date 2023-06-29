@@ -17,11 +17,11 @@ jobs:
         # You may pin to the exact commit or the version.
         # uses: goto-bus-stop/setup-zig@14a1906c0dcb0d690f5e9733c5cd0e6484ac6406
         uses: goto-bus-stop/setup-zig@v2.1.0
-        with:
+        # with:
           # Version of the zig compiler to use (must be 0.3.0 or up)
-          version: 0.10 # default is master
+          # version: 0.10 # default is master
           # Cache downloaded compilers for faster action runs. Strongly recommended.
-          cache: true # optional, default is true            
+          # cache: true # optional, default is true            
 
       # `cargo check` command here will use installed `nightly`
       # as it is set as an "override" for current directory
