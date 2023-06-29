@@ -13,13 +13,25 @@ jobs:
             toolchain: nightly
             override: true
 
+      - name: Setup Zig
+        # You may pin to the exact commit or the version.
+        # uses: goto-bus-stop/setup-zig@14a1906c0dcb0d690f5e9733c5cd0e6484ac6406
+        uses: goto-bus-stop/setup-zig@v2.1.0
+        with:
+          # Version of the zig compiler to use (must be 0.3.0 or up)
+          version: 0.10 # default is master
+          # Cache downloaded compilers for faster action runs. Strongly recommended.
+          cache: true # optional, default is true            
+
       # `cargo check` command here will use installed `nightly`
       # as it is set as an "override" for current directory
-      - name: cross
+      - name: compile helix
         run: |
           git clone https://github.com/helix-editor/helix.git
-          cargo install cross
-          cd helix && cross build --release --target aarch64-unknown-linux-musl
+          rustup target add x86_64-unknown-linux-musl
+          rustup target add aarch64-unknown-linux-musl
+          cargo install cargo-zigbuild
+          cd helix && cargo zigbuild --release --target x86_64-unknown-linux-musl
 
 #       - name : upload binary
 #         uses: actions/upload-artifact@master
