@@ -30,7 +30,8 @@ jobs:
           git clone https://github.com/helix-editor/helix.git
           rustup target add x86_64-unknown-linux-musl
           cargo install cargo-zigbuild
-          cd helix && cargo zigbuild --release --target x86_64-unknown-linux-musl
+          cd helix && rustup target add x86_64-unknown-linux-musl && cargo zigbuild --release --target x86_64-unknown-linux-musl
+          ls helix/*/*
 
 #       - name : upload binary
 #         uses: actions/upload-artifact@master
