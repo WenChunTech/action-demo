@@ -33,7 +33,7 @@ jobs:
             components: rustfmt, clippy
 
       - name: Build the binary for ${{ runner.os }}-${{runner.arch}}
-        if: ${{ runner.os }} != 'windows'
+        if: ${{ runner.os }} != 'Windows'
         run: |
           cargo build --release
           echo `uname -a`
@@ -41,7 +41,7 @@ jobs:
           mv target/release/action-demo action-demo-${{ runner.os }}-${{runner.arch}}
 
       - name: Build the binary for windows-lastest
-        if: ${{ runner.os }} == 'windows'
+        if: ${{ runner.os }} == 'Windows'
         shell: bash
         run: |
           cargo build --release
