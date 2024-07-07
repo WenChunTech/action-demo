@@ -54,7 +54,7 @@ jobs:
           if [[ "${{ matrix.runner }}" == "windows-latest" ]]; then
             BIN_SUFFIX=".exe"
           fi
-
+          ls target/*
           # The built binary output location
           BIN_OUTPUT="target/${{ matrix.target }}/release/${PROJECT_NAME}${BIN_SUFFIX}"
 
@@ -64,7 +64,7 @@ jobs:
           tar -zcf "${PROJECT_NAME}.tar.gz" "${BIN_OUTPUT}"
 
           # Move the built binary where you want it
-          mv "${BIN_OUTPUT}" "./<your-destination>/${BIN_RELEASE}"
+          # mv "${BIN_OUTPUT}" "./<your-destination>/${BIN_RELEASE}"
 
       - name : upload binary
         uses: actions/upload-artifact@master
