@@ -1,52 +1,84 @@
-name: cross
-on: push
+name: cross-release
+on:
+    workflow_dispatch:
+    push:
+      tags:
+        - '**'
 
 jobs:
   check:
     name: Rust project
-    runs-on: ubuntu-latest
+    strategy:
+        matrix:
+          os: [ubuntu-latest, windows-latest, macos-latest]
+          arch: [arm64]
+
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
       - name: Install latest nightly
         uses: actions-rs/toolchain@v1
         with:
             toolchain: nightly
             override: true
 
-      - name: Setup Zig
-        # You may pin to the exact commit or the version.
-        # uses: goto-bus-stop/setup-zig@14a1906c0dcb0d690f5e9733c5cd0e6484ac6406
-        uses: goto-bus-stop/setup-zig@v2.1.0
+      - name: Install minimal nightly with clippy and rustfmt
+        uses: actions-rs/toolchain@v1
         with:
-          # Version of the zig compiler to use (must be 0.3.0 or up)
-          version: 0.10.0 # default is master
-          # Cache downloaded compilers for faster action runs. Strongly recommended.
-          # cache: true # optional, default is true            
+            profile: minimal
+            toolchain: nightly
+            components: rustfmt, clippy
 
-      # `cargo check` command here will use installed `nightly`
-      # as it is set as an "override" for current directory
-      - name: compile helix
+      - name: Build the binary and package it
         run: |
-          echo "before current dir is: $(pwd)"
-          git clone https://github.com/helix-editor/helix.git
-          cargo install cargo-zigbuild
-          RUSTFLAGS="-C target-feature=-crt-static" && cd helix && pwd  && rustup target add x86_64-unknown-linux-musl && cargo zigbuild --release --target x86_64-unknown-linux-musl
-          rustup target add aarch64-unknown-linux-musl && cargo zigbuild --release --target aarch64-unknown-linux-musl
-          echo "after current dir is: $(pwd)"
-          tar -zcf helix.tar.gz target/*/release/hx* runtime
-          pwd
+          cargo build --release
+          echo "this os arch is ${{ runner.os }}-${arch}"
+          mv target/release/action-demo action-demo-${{ runner.os }}-${arch}
 
-      - name: Cache
-        uses: actions/cache@v1.2.1
-        with:
-          # A directory to store and save the cache
-          path: /home/runner/work/action-demo/action-demo/helix
-          # An explicit key for restoring and saving the cache
-          key: key
-          
       - name : upload binary
         uses: actions/upload-artifact@master
         if: always()
         with:
-          name: Task
-          path: helix/helix.tar.gz
+          name: action-demo-${{ runner.os }}-${arch}
+          path: action-demo-${{ runner.os }}-${arch}
+
+    #   - name: Setup Zig
+    #     # You may pin to the exact commit or the version.
+    #     # uses: goto-bus-stop/setup-zig@14a1906c0dcb0d690f5e9733c5cd0e6484ac6406
+    #     uses: goto-bus-stop/setup-zig@v2.1.0
+    #     with:
+    #       # Version of the zig compiler to use (must be 0.3.0 or up)
+    #       version: 0.10.0 # default is master
+    #       # Cache downloaded compilers for faster action runs. Strongly recommended.
+    #       # cache: true # optional, default is true
+
+    #   # `cargo check` command here will use installed `nightly`
+    #   # as it is set as an "override" for current directory
+    #   - name: compile helix
+    #     run: |
+    #       echo "before current dir is: $(pwd)"
+    #       git clone https://github.com/helix-editor/helix.git
+    #       cargo install cargo-zigbuild
+    #       RUSTFLAGS="-C target-feature=-crt-static" && cd helix && pwd  && rustup target add x86_64-unknown-linux-musl && cargo zigbuild --release --target x86_64-unknown-linux-musl
+    #       rustup target add aarch64-unknown-linux-musl && cargo zigbuild --release --target aarch64-unknown-linux-musl
+    #       echo "after current dir is: $(pwd)"
+    #       tar -zcf helix.tar.gz target/*/release/hx* runtime
+    #       pwd
+
+    #   - name: Cache
+    #     uses: actions/cache@v1.2.1
+    #     with:
+    #       # A directory to store and save the cache
+    #       path: /home/runner/work/action-demo/action-demo/helix
+    #       # An explicit key for restoring and saving the cache
+    #       key: key
+
+    #   - name : upload binary
+    #     uses: actions/upload-artifact@master
+    #     if: always()
+    #     with:
+    #       name: Task
+    #       path: helix/helix.tar.gz
