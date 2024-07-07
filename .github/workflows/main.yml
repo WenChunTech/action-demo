@@ -4,87 +4,70 @@ on:
     push:
       tags:
         - '**'
+env:
+  # The project name specified in your Cargo.toml
+  PROJECT_NAME: action-demo
 
 jobs:
-  nix_release:
+  release:
     name: Rust project Relase for Linux and MacOS
-    strategy:
-        matrix:
-          os: [ubuntu-latest, macos-latest]
-          arch: [arm64]
+    runs-on: ${{ matrix.runner }}
 
-    runs-on: ${{ matrix.os }}
-    steps:
-
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install latest nightly
-        uses: actions-rs/toolchain@v1
-        with:
-            toolchain: nightly
-            override: true
-
-      - name: Install minimal nightly with clippy and rustfmt
-        uses: actions-rs/toolchain@v1
-        with:
-            profile: minimal
-            toolchain: nightly
-            components: rustfmt, clippy
-
-      - name: Build the binary for ${{ runner.os }}-${{runner.arch}}
-        run: |
-          cargo build --release
-          echo `uname -a`
-          echo "this os arch is ${{ runner.os }}-${{runner.arch}}"
-          mv target/release/action-demo action-demo-${{ runner.os }}-${{runner.arch}}
-
-      - name : upload binary
-        uses: actions/upload-artifact@master
-        if: always()
-        with:
-          name: action-demo-${{ runner.os }}-${{runner.arch}}
-          path: action-demo-${{ runner.os }}-${{runner.arch}}
-
-  windows-release:
-    name: Rust project Relase for Windows
+    # Define the build matrix for cross-compilation
     strategy:
       matrix:
-        os: [windows-latest]
-        arch: [arm64]
-    runs-on: windows-latest
+        include:
+          - name: linux-amd64
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - name: windows-amd64
+            runner: windows-latest
+            target: x86_64-pc-windows-msvc
+          - name: macos-amd64
+            runner: macos-latest
+            target: x86_64-apple-darwin
+          - name: macos-arm64
+            runner: macos-latest
+            target: aarch64-apple-darwin
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Install latest nightly
-        uses: actions-rs/toolchain@v1
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
         with:
-            toolchain: nightly
-            override: true
+          targets: "${{ matrix.target }}"
 
-      - name: Install minimal nightly with clippy and rustfmt
-        uses: actions-rs/toolchain@v1
-        with:
-            profile: minimal
-            toolchain: nightly
-            components: rustfmt, clippy
+      - name: Build Binary
+        run: cargo build --verbose --locked --release --target ${{ matrix.target }}
 
-      - name: Build the binary for windows-lastest
+      - name: Release Binary
         shell: bash
         run: |
-          cargo build --release
-          echo `uname -a`
-          echo "this os arch is ${{ runner.os }}-${{runner.arch}}"
-          mv target/release/action-demo.exe action-demo-${{ runner.os }}-${{runner.arch}}.exe
+          ls target/*
+          BIN_SUFFIX=""
+          if [[ "${{ matrix.runner }}" == "windows-latest" ]]; then
+            BIN_SUFFIX=".exe"
+          fi
+
+          # The built binary output location
+          BIN_OUTPUT="target/${{ matrix.target }}/release/${PROJECT_NAME}${BIN_SUFFIX}"
+
+          # Define a better name for the final binary
+          BIN_RELEASE="${PROJECT_NAME}-${{ matrix.name }}${BIN_SUFFIX}"
+          BIN_RELEASE_VERSIONED="${PROJECT_NAME}-${{ github.ref_name }}-${{ matrix.name }}${BIN_SUFFIX}"
+          tar -zcf ${PROJECT_NAME}${BIN_SUFFIX}.tar.gz ${BIN_OUTPUT}
+
+          # Move the built binary where you want it
+          # mv "${BIN_OUTPUT}" "./<your-destination>/${BIN_RELEASE}"
 
       - name : upload binary
         uses: actions/upload-artifact@master
         if: always()
         with:
-          name: action-demo-${{ runner.os }}-${{runner.arch}}
-          path: action-demo-${{ runner.os }}-${{runner.arch}}
+          name: task.tar.gz
+          path: *.tar.gz
 
     #   - name: Setup Zig
     #     # You may pin to the exact commit or the version.
