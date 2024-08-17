@@ -5,19 +5,26 @@ on:
       tags:
         - '**'
 env:
-  # The project name specified in your Cargo.toml
-  PROJECT_NAME: action-demo
+  PROJECT_NAME: smt
 
 jobs:
-  release:
+  windows-release:
     runs-on: ${{ matrix.runner }}
-
     strategy:
       matrix:
         include:
-          - name: linux-amd64-gnu
-            runner: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
+          - name: windows-x86_64-msvc
+            runner: windows-latest
+            target: x86_64-pc-windows-msvc
+          - name: windows-x86_64-gnu
+            runner: windows-latest
+            target: x86_64-pc-windows-gnu
+          - name: windows-arm64-msvc
+            runner: windows-latest
+            target: aarch64-pc-windows-msvc
+          - name: windows-arm64-gnu
+            runner: windows-latest
+            target: aarch64-pc-windows-gnu
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -38,10 +45,52 @@ jobs:
           SCCACHE_GHA_ENABLED: "true"
           RUSTC_WRAPPER: "sccache"
         run: |
-          pwd
-          ls
-          bash cross.sh
+          cargo zigbuild --release --target "${{matrix.target}}"
           ls target/*/release/
+# name: cross-release
+# on:
+#     workflow_dispatch:
+#     push:
+#       tags:
+#         - '**'
+# env:
+#   # The project name specified in your Cargo.toml
+#   PROJECT_NAME: action-demo
+
+# jobs:
+#   release:
+#     runs-on: ${{ matrix.runner }}
+
+#     strategy:
+#       matrix:
+#         include:
+#           - name: linux-amd64-gnu
+#             runner: ubuntu-latest
+#             target: x86_64-unknown-linux-gnu
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v3
+
+#       - name: Install Rust
+#         uses: dtolnay/rust-toolchain@stable
+#         with:
+#           targets: "${{ matrix.target }}"
+
+#       - name: Setup Zig
+#         uses: goto-bus-stop/setup-zig@v2.2.0
+
+#       - name: Run sccache-cache
+#         uses: mozilla-actions/sccache-action@v0.0.5
+
+#       - name: Build Binary
+#         env:
+#           SCCACHE_GHA_ENABLED: "true"
+#           RUSTC_WRAPPER: "sccache"
+#         run: |
+#           pwd
+#           ls
+#           bash cross.sh
+#           ls target/*/release/
 
       # - name: Release Binary
       #   shell: bash
