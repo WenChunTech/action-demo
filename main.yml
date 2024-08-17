@@ -1,0 +1,118 @@
+name: cross-release
+on:
+    workflow_dispatch:
+    push:
+      tags:
+        - '**'
+env:
+  # The project name specified in your Cargo.toml
+  PROJECT_NAME: action-demo
+
+jobs:
+  release:
+    runs-on: ${{ matrix.runner }}
+
+    strategy:
+      matrix:
+        # You can add more, for any target you'd like!
+        include:
+          - name: linux-amd64-gnu
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - name: linux-amd64-musl
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+          - name: macos-amd64
+            runner: macos-latest
+            target: x86_64-apple-darwin
+          - name: macos-arm64
+            runner: macos-latest
+            target: aarch64-apple-darwin
+          - name: windows-amd64
+            runner: windows-latest
+            target: x86_64-pc-windows-msvc
+          - name: windows-gnu
+            runner: windows-latest
+            target: x86_64-pc-windows-gnu
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: "${{ matrix.target }}"
+
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.5
+
+      - name: Build Binary
+        env:
+          SCCACHE_GHA_ENABLED: "true"
+          RUSTC_WRAPPER: "sccache"
+        run: cargo build --verbose --locked --release --target ${{ matrix.target }}
+
+      - name: Release Binary
+        shell: bash
+        run: |
+          BIN_SUFFIX=""
+          if [[ "${{ matrix.runner }}" == "windows-latest" ]]; then
+            BIN_SUFFIX=".exe"
+          fi
+          ls target/*
+          # The built binary output location
+          BIN_OUTPUT="target/${{ matrix.target }}/release/${PROJECT_NAME}${BIN_SUFFIX}"
+
+          # Define a better name for the final binary
+          BIN_RELEASE="${PROJECT_NAME}-${{ matrix.name }}${BIN_SUFFIX}"
+          BIN_RELEASE_VERSIONED="${PROJECT_NAME}-${{ github.ref_name }}-${{ matrix.name }}${BIN_SUFFIX}"
+          tar -zcf "${PROJECT_NAME}.tar.gz" "${BIN_OUTPUT}"
+
+          # Move the built binary where you want it
+          # mv "${BIN_OUTPUT}" "./<your-destination>/${BIN_RELEASE}"
+
+      - name : upload binary
+        uses: actions/upload-artifact@master
+        if: always()
+        with:
+          name: ${PROJECT_NAME}-${{ matrix.name }}.tar.gz
+          path: ./*.tar.gz
+
+    #   - name: Setup Zig
+    #     # You may pin to the exact commit or the version.
+    #     # uses: goto-bus-stop/setup-zig@14a1906c0dcb0d690f5e9733c5cd0e6484ac6406
+    #     uses: goto-bus-stop/setup-zig@v2.1.0
+    #     with:
+    #       # Version of the zig compiler to use (must be 0.3.0 or up)
+    #       version: 0.10.0 # default is master
+    #       # Cache downloaded compilers for faster action runs. Strongly recommended.
+    #       # cache: true # optional, default is true
+
+    #   # `cargo check` command here will use installed `nightly`
+    #   # as it is set as an "override" for current directory
+    #   - name: compile helix
+    #     run: |
+    #       echo "before current dir is: $(pwd)"
+    #       git clone https://github.com/helix-editor/helix.git
+    #       cargo install cargo-zigbuild
+    #       RUSTFLAGS="-C target-feature=-crt-static" && cd helix && pwd  && rustup target add x86_64-unknown-linux-musl && cargo zigbuild --release --target x86_64-unknown-linux-musl
+    #       rustup target add aarch64-unknown-linux-musl && cargo zigbuild --release --target aarch64-unknown-linux-musl
+    #       echo "after current dir is: $(pwd)"
+    #       tar -zcf helix.tar.gz target/*/release/hx* runtime
+    #       pwd
+
+    #   - name: Cache
+    #     uses: actions/cache@v1.2.1
+    #     with:
+    #       # A directory to store and save the cache
+    #       path: /home/runner/work/action-demo/action-demo/helix
+    #       # An explicit key for restoring and saving the cache
+    #       key: key
+
+    #   - name : upload binary
+    #     uses: actions/upload-artifact@master
+    #     if: always()
+    #     with:
+    #       name: Task
+    #       path: helix/helix.tar.gz
