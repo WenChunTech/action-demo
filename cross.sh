@@ -9,7 +9,7 @@ targets=(aarch64-apple-darwin
          x86_64-unknown-linux-gnu
          x86_64-unknown-linux-musl)
 
-cargo install zigbuild
+cargo install --locked cargo-zigbuild
 for target in "${targets[@]}"; do
     echo "Building for $target"
     rustup target add "$target"
