@@ -27,6 +27,9 @@ jobs:
         with:
           targets: "${{ matrix.target }}"
 
+      - name: Setup Zig
+        uses: goto-bus-stop/setup-zig@v2.2.0
+
       - name: Run sccache-cache
         uses: mozilla-actions/sccache-action@v0.0.5
 
