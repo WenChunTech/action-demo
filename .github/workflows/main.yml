@@ -35,6 +35,8 @@ jobs:
           SCCACHE_GHA_ENABLED: "true"
           RUSTC_WRAPPER: "sccache"
         run: |
+          pwd
+          ls
           bash corss.sh
           ls target/*/release/
 
