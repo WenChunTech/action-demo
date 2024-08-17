@@ -37,7 +37,7 @@ jobs:
         run: |
           pwd
           ls
-          bash corss.sh
+          bash cross.sh
           ls target/*/release/
 
       # - name: Release Binary
