@@ -42,6 +42,7 @@ jobs:
           SCCACHE_GHA_ENABLED: "true"
           RUSTC_WRAPPER: "sccache"
         run: |
+          cargo install --locked cargo-zigbuild
           cargo zigbuild --release --target "${{matrix.target}}"
           ls target/*/release/
 # name: cross-release
