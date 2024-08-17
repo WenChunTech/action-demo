@@ -16,9 +16,9 @@ jobs:
           - name: windows-x86_64-msvc
             runner: windows-latest
             target: x86_64-pc-windows-msvc
-          - name: windows-x86_64-gnu
-            runner: windows-latest
-            target: x86_64-pc-windows-gnu
+          # - name: windows-x86_64-gnu
+          #   runner: windows-latest
+          #   target: x86_64-pc-windows-gnu
           - name: windows-arm64-msvc
             runner: windows-latest
             target: aarch64-pc-windows-msvc
