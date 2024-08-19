@@ -19,32 +19,38 @@ jobs:
           # - name: windows-x86_64-gnu
           #   runner: windows-latest
           #   target: x86_64-pc-windows-gnu
-          - name: windows-arm64-msvc
-            runner: windows-latest
-            target: aarch64-pc-windows-msvc
+          # - name: windows-arm64-msvc
+          #   runner: windows-latest
+          #   target: aarch64-pc-windows-msvc
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: "${{ matrix.target }}"
-
-      - name: Setup Zig
-        uses: goto-bus-stop/setup-zig@v2.2.0
-
-      - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.5
-
-      - name: Build Binary
-        env:
-          SCCACHE_GHA_ENABLED: "true"
-          RUSTC_WRAPPER: "sccache"
+      - name: run cmd
         run: |
-          cargo install --locked cargo-zigbuild
-          cargo zigbuild --release --target "${{matrix.target}}"
-          ls target/*/release/
+          cargo --version
+          rustup show
+          docker images -a
+          go env
+      # - name: Install Rust
+      #   uses: dtolnay/rust-toolchain@stable
+      #   with:
+      #     targets: "${{ matrix.target }}"
+
+      # - name: Setup Zig
+      #   uses: goto-bus-stop/setup-zig@v2.2.0
+
+      # - name: Run sccache-cache
+      #   uses: mozilla-actions/sccache-action@v0.0.5
+
+      # - name: Build Binary
+      #   env:
+      #     SCCACHE_GHA_ENABLED: "true"
+      #     RUSTC_WRAPPER: "sccache"
+      #   run: |
+      #     cargo install --locked cargo-zigbuild
+      #     cargo zigbuild --release --target "${{matrix.target}}"
+      #     ls target/*/release/
 # name: cross-release
 # on:
 #     workflow_dispatch:
