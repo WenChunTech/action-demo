@@ -23,38 +23,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: "${{ matrix.target }}"
-
-      - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.5
-
-      - name: Build Binary
-        env:
-          SCCACHE_GHA_ENABLED: "true"
-          RUSTC_WRAPPER: "sccache"
-        run: |
-          rustup target add "${{matrix.target}}"
-          cargo build --release --target "${{matrix.target}}"
-          ls target/*/release/
-
-  macos:
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      matrix:
-        include:
-          - name: macos-x86_64-gnu
-            runner: macos-latest
-            target: x86_64-apple-darwin
-          - name: macos-aarch64-gnu
-            runner: macos-latest
-            target: aarch64-apple-darwin
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: carlosperate/arm-none-eabi-gcc-action@v1
+      - run: arm-none-eabi-gcc --version
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -72,6 +42,39 @@ jobs:
           rustup target add "${{matrix.target}}"
           cargo build --release --target "${{matrix.target}}"
           ls target/*/release/
+
+  # macos:
+  #   runs-on: ${{ matrix.runner }}
+  #   strategy:
+  #     matrix:
+  #       include:
+  #         - name: macos-x86_64-gnu
+  #           runner: macos-latest
+  #           target: x86_64-apple-darwin
+  #         - name: macos-aarch64-gnu
+  #           runner: macos-latest
+  #           target: aarch64-apple-darwin
+
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+
+  #     - name: Install Rust
+  #       uses: dtolnay/rust-toolchain@stable
+  #       with:
+  #         targets: "${{ matrix.target }}"
+
+  #     - name: Run sccache-cache
+  #       uses: mozilla-actions/sccache-action@v0.0.5
+
+  #     - name: Build Binary
+  #       env:
+  #         SCCACHE_GHA_ENABLED: "true"
+  #         RUSTC_WRAPPER: "sccache"
+  #       run: |
+  #         rustup target add "${{matrix.target}}"
+  #         cargo build --release --target "${{matrix.target}}"
+  #         ls target/*/release/
 
 # name: cross-release
 # on:
