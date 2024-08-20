@@ -8,20 +8,17 @@ env:
   PROJECT_NAME: smt
 
 jobs:
-  windows-release:
+  linux:
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
         include:
-          - name: windows-x86_64-msvc
-            runner: windows-latest
-            target: x86_64-pc-windows-msvc
-          # - name: windows-x86_64-gnu
-          #   runner: windows-latest
-          #   target: x86_64-pc-windows-gnu
-          - name: windows-arm64-msvc
-            runner: windows-latest
-            target: aarch64-pc-windows-msvc
+          - name: ubuntu-x86_64-gnu
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - name: ubuntu-aarch64-gnu
+            runner: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -31,8 +28,38 @@ jobs:
         with:
           targets: "${{ matrix.target }}"
 
-      - name: Setup Zig
-        uses: goto-bus-stop/setup-zig@v2.2.0
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.5
+
+      - name: Build Binary
+        env:
+          SCCACHE_GHA_ENABLED: "true"
+          RUSTC_WRAPPER: "sccache"
+        run: |
+          rustup target add "${{matrix.target}}"
+          cargo build --release --target "${{matrix.target}}"
+          ls target/*/release/
+
+  macos:
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - name: macos-x86_64-gnu
+            runner: macos-latest
+            target: x86_64-apple-darwin
+          - name: macos-aarch64-gnu
+            runner: macos-latest
+            target: aarch64-apple-darwin
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: "${{ matrix.target }}"
 
       - name: Run sccache-cache
         uses: mozilla-actions/sccache-action@v0.0.5
@@ -42,9 +69,10 @@ jobs:
           SCCACHE_GHA_ENABLED: "true"
           RUSTC_WRAPPER: "sccache"
         run: |
-          cargo install --locked cargo-zigbuild
-          cargo zigbuild --release --target "${{matrix.target}}"
+          rustup target add "${{matrix.target}}"
+          cargo build --release --target "${{matrix.target}}"
           ls target/*/release/
+
 # name: cross-release
 # on:
 #     workflow_dispatch:
@@ -75,7 +103,7 @@ jobs:
 #           targets: "${{ matrix.target }}"
 
 #       - name: Setup Zig
-#         uses: goto-bus-stop/setup-zig@v2.2.0
+#         uses: goto-bus-stop/setup-zig@v2.2.0h
 
 #       - name: Run sccache-cache
 #         uses: mozilla-actions/sccache-action@v0.0.5
