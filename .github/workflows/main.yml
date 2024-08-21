@@ -13,18 +13,15 @@ jobs:
     strategy:
       matrix:
         include:
-          # - name: ubuntu-x86_64-gnu
-          #   runner: ubuntu-latest
-          #   target: x86_64-unknown-linux-gnu
+          - name: ubuntu-x86_64-gnu
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
           - name: ubuntu-aarch64-gnu
             runner: ubuntu-latest
             target: aarch64-unknown-linux-gnu
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
-      # - uses: carlosperate/arm-none-eabi-gcc-action@v1
-      # - run: arm-none-eabi-gcc --version
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -34,25 +31,26 @@ jobs:
       - name: Run sccache-cache
         uses: mozilla-actions/sccache-action@v0.0.5
 
-      # - name: Build Binary
-      #   if: ${{matrix.target}} != 'aarch64-unknown-linux-gnu'
-      #   env:
-      #     SCCACHE_GHA_ENABLED: "true"
-      #     RUSTC_WRAPPER: "sccache"
-      #   run: |
-      #     rustup target add "${{matrix.target}}"
-      #     cargo build --release --target "${{matrix.target}}"
-      #     ls target/*/release/
+      - name: Build Binary for ${{ matrix.target }}
+        if: ${{matrix.target}} != 'aarch64-unknown-linux-gnu'
+        env:
+          SCCACHE_GHA_ENABLED: "true"
+          RUSTC_WRAPPER: "sccache"
+        run: |
+          echo "Building for ${{matrix.target}}"
+          rustup target add "${{matrix.target}}"
+          cargo build --release --target "${{matrix.target}}"
+          ls target/*/release/
 
-      - name: Build Binary
-        # if: ${{matrix.target}} == 'aarch64-unknown-linux-gnu'
+      - name: Build Binary for ${{ matrix.target }}
+        if: ${{matrix.target}} == 'aarch64-unknown-linux-gnu'
         env:
           SCCACHE_GHA_ENABLED: "true"
           RUSTC_WRAPPER: "sccache"
         run: |
           sudo apt install gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu -y
-          sudo apt install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross
-          sudo dpkg --add-architecture arm64
+          # sudo apt install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross
+          # sudo dpkg --add-architecture arm64
           rustup target add "${{matrix.target}}"
           cargo build --release --target "${{matrix.target}}" --config target.${{matrix.target}}.linker=\"aarch64-linux-gnu-gcc\"
           ls target/*/release/
