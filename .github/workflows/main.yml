@@ -36,7 +36,7 @@ jobs:
           SCCACHE_GHA_ENABLED: "true"
           RUSTC_WRAPPER: "sccache"
         run: |
-          if[ '${{matrix.target}}' = 'aarch64-unknown-linux-gnu' ]; then
+          if [ '${{matrix.target}}' = 'aarch64-unknown-linux-gnu' ]; then
             sudo apt install gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu -y
             # sudo apt install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross
             # sudo dpkg --add-architecture arm64
