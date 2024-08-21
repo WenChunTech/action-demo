@@ -50,9 +50,9 @@ jobs:
           SCCACHE_GHA_ENABLED: "true"
           RUSTC_WRAPPER: "sccache"
         run: |
-          sudo apt upgrade && sudo apt install gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
+          sudo apt install gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu -y
           sudo apt install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross
-          dpkg --add-architecture arm64
+          sudo dpkg --add-architecture arm64
           rustup target add "${{matrix.target}}"
           cargo build --release --target "${{matrix.target}}" --config target.${{matrix.target}}.linker=\"aarch64-linux-gnu-gcc\"
           ls target/*/release/
