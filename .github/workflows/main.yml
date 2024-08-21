@@ -52,7 +52,7 @@ jobs:
         run: |
           sudo apt upgrade && sudo apt install gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
           rustup target add "${{matrix.target}}"
-          cargo build --release --target "${{matrix.target}}" --config target.${{matrix.target}}.linker=\"aarch64-linux-gnu-gcc\" 
+          cargo build --release --target "${{matrix.target}}" --config target.${{matrix.target}}.linker=\"arm-none-eabi-gcc\" 
           ls target/*/release/
 
   # macos:
