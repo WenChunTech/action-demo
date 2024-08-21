@@ -35,12 +35,24 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.5
 
       - name: Build Binary
+        if: ${{ ${{matrix.target}} != 'aarch64-unknown-linux-gnu' }}
         env:
           SCCACHE_GHA_ENABLED: "true"
           RUSTC_WRAPPER: "sccache"
         run: |
           rustup target add "${{matrix.target}}"
           cargo build --release --target "${{matrix.target}}"
+          ls target/*/release/
+
+      - name: Build Binary
+        if: ${{ ${{matrix.target}} == 'aarch64-unknown-linux-gnu' }}
+        env:
+          SCCACHE_GHA_ENABLED: "true"
+          RUSTC_WRAPPER: "sccache"
+        run: |
+          sudo apt upgrade && sudo apt install gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
+          rustup target add "${{matrix.target}}"
+          cargo build --release --target "${{matrix.target}}" --config target.${{matrix.target}}.linker=\"aarch64-linux-gnu-gcc\" 
           ls target/*/release/
 
   # macos:
