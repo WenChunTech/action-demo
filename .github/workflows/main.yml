@@ -32,25 +32,15 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.5
 
       - name: Build Binary for ${{ matrix.target }}
-        if: ${{matrix.target}} != 'aarch64-unknown-linux-gnu'
         env:
           SCCACHE_GHA_ENABLED: "true"
           RUSTC_WRAPPER: "sccache"
         run: |
-          echo "Building for ${{matrix.target}}"
-          rustup target add "${{matrix.target}}"
-          cargo build --release --target "${{matrix.target}}"
-          ls target/*/release/
-
-      - name: Build Binary for ${{ matrix.target }}
-        if: ${{matrix.target}} == 'aarch64-unknown-linux-gnu'
-        env:
-          SCCACHE_GHA_ENABLED: "true"
-          RUSTC_WRAPPER: "sccache"
-        run: |
-          sudo apt install gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu -y
-          # sudo apt install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross
-          # sudo dpkg --add-architecture arm64
+          if (( ${{matrix.target}} == 'aarch64-unknown-linux-gnu' )); then
+            sudo apt install gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu -y
+            # sudo apt install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross
+            # sudo dpkg --add-architecture arm64
+          fi
           rustup target add "${{matrix.target}}"
           cargo build --release --target "${{matrix.target}}" --config target.${{matrix.target}}.linker=\"aarch64-linux-gnu-gcc\"
           ls target/*/release/
