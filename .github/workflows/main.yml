@@ -35,7 +35,7 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.5
 
       - name: Build Binary
-        if: ${{ ${{matrix.target}} != 'aarch64-unknown-linux-gnu' }}
+        if: ${{matrix.target}} != 'aarch64-unknown-linux-gnu'
         env:
           SCCACHE_GHA_ENABLED: "true"
           RUSTC_WRAPPER: "sccache"
@@ -45,7 +45,7 @@ jobs:
           ls target/*/release/
 
       - name: Build Binary
-        if: ${{ ${{matrix.target}} == 'aarch64-unknown-linux-gnu' }}
+        if: ${{matrix.target}} == 'aarch64-unknown-linux-gnu'
         env:
           SCCACHE_GHA_ENABLED: "true"
           RUSTC_WRAPPER: "sccache"
