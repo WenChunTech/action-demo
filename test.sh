@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-if [ 'x86_64-unknown-linux-gnu' = 'aarch64-unknown-linux-gnu' ]; then
-    echo "hello"
+if [ -z "$1" ]; then
+    echo "Usage: $0 <file>"
+    exit 1
+else
+    echo "File: $1"
+    echo "Content:"
+    cat $1
 fi
-echo "world"

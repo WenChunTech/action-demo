@@ -38,11 +38,12 @@ jobs:
         run: |
           if [ '${{matrix.target}}' = 'aarch64-unknown-linux-gnu' ]; then
             sudo apt install gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu -y
+            cargo build --release --target "${{matrix.target}}" --config target.${{matrix.target}}.linker=\"aarch64-linux-gnu-gcc\"
             # sudo apt install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross
             # sudo dpkg --add-architecture arm64
+          else
+            cargo build --release --target "${{matrix.target}}"
           fi
-          cargo build --release --target "${{matrix.target}}" --config target.${{matrix.target}}.linker=\"aarch64-linux-gnu-gcc\"
-          ls target/*/release/
 
   # macos:
   #   runs-on: ${{ matrix.runner }}
