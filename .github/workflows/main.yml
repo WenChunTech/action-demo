@@ -20,7 +20,13 @@ jobs:
     #         runner: ubuntu-latest
     #         target: aarch64-unknown-linux-gnu
     steps:
+        - name: Run sccache-cache
+          uses: mozilla-actions/sccache-action@v0.0.5    
+
         - name: build zed
+          env:
+              SCCACHE_GHA_ENABLED: "true"
+              RUSTC_WRAPPER: "sccache"        
           run: |
               rustup update
               rustup target add wasm32-wasip1
@@ -31,8 +37,8 @@ jobs:
           uses: actions/upload-artifact@master
           if: always()
           with:
-              name: zed/target/release/*.exe
-              path: ./*.tar.gz
+              name: zed.zip
+              path: zed/target/release/*.exe
               
       # - name: Checkout
       #   uses: actions/checkout@v3
